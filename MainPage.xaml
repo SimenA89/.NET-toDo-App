@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="ToDo.MainPage">
+
+    <StackLayout>
+        <!-- Other UI elements can be added here as well -->
+
+        <CollectionView x:Name="TasksCollectionView" ItemsSource="{Binding Tasks}" SelectionMode="None">
+            <CollectionView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Padding="10" ColumnSpacing="15">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <CheckBox IsChecked="{Binding IsCompleted}"
+                                  VerticalOptions="Center"
+                                  CheckedChanged="OnCheckBoxCheckedChanged"/>
+                        <StackLayout Grid.Column="1" Orientation="Vertical" Spacing="5">
+                            <Label Text="{Binding TaskName}" Style="{StaticResource PrimaryLabel}"/>
+                            <Label Text="{Binding Description}" Style="{StaticResource PrimaryLabel}"/>
+                            <Label Text="{Binding DueDate}" Style="{StaticResource PrimaryLabel}"/>
+                            <!-- Bind other properties as needed -->
+                            <StackLayout.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Tapped="OnTaskTapped" 
+                                    CommandParameter="{Binding .}" />
+                            </StackLayout.GestureRecognizers>
+                        </StackLayout>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+        <Button Text="Add Task" Style="{StaticResource AddTaskButtonStyle}" Clicked="OnAddTaskClicked"/>
+        <!-- More UI elements can be added here -->
+    </StackLayout>
+</ContentPage>
