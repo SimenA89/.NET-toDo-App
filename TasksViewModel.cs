@@ -3,72 +3,77 @@ using System.Threading.Tasks; // Add this for Task
 using System.Windows.Input;
 using ToDo;
 
-public class TasksViewModel
+namespace ToDo.ViewModels
 {
-    private readonly TaskDataService _taskDataService;
-
-    public ObservableCollection<TaskItem> Tasks { get; private set; } = new ObservableCollection<TaskItem>();
-
-    public ICommand DeleteCommand { get; }
-
-    public TasksViewModel(TaskDataService taskDataService)
+    public class TasksViewModel
     {
-        _taskDataService = taskDataService;
-        LoadTasksAsync().ConfigureAwait(false); // Load tasks asynchronously
+        private readonly TaskDataService _taskDataService;
 
-        DeleteCommand = new Command<TaskItem>(DeleteTask);
-    }
+        public ObservableCollection<TaskItem> Tasks { get; private set; } = new ObservableCollection<TaskItem>();
 
-    private async Task LoadTasksAsync()
-    {
-        // Try to load tasks from the data service
-        var loadedTasks = await _taskDataService.LoadTasksAsync();
+        public ICommand DeleteCommand { get; }
 
-        if (loadedTasks != null && loadedTasks.Count > 0)
+        public TasksViewModel(TaskDataService taskDataService)
         {
-            // Clear the current tasks and load the persisted tasks
-            Tasks.Clear();
-            foreach (var task in loadedTasks)
+            _taskDataService = taskDataService;
+            LoadTasksAsync().ConfigureAwait(false); // Load tasks asynchronously
+
+            DeleteCommand = new Command<TaskItem>(DeleteTask);
+        }
+
+        private async Task LoadTasksAsync()
+        {
+            // Try to load tasks from the data service
+            var loadedTasks = await _taskDataService.LoadTasksAsync();
+
+            if (loadedTasks != null && loadedTasks.Count > 0)
             {
-                Tasks.Add(task);
+                // Clear the current tasks and load the persisted tasks
+                Tasks.Clear();
+                foreach (var task in loadedTasks)
+                {
+                    Tasks.Add(task);
+                }
+            }
+            else
+            {
+                // No tasks found, initialize with dummy data if necessary
+                InitializeWithDummyData();
             }
         }
-        else
+
+        private void InitializeWithDummyData()
         {
-            // No tasks found, initialize with dummy data if necessary
-            InitializeWithDummyData();
+            Tasks.Add(new TaskItem { TaskName = "Sample Task 1", Description = "Description", DueDate = DateTime.Now });
+            Tasks.Add(new TaskItem { TaskName = "Sample Task 2", Description = "Description", DueDate = DateTime.Now });
+            // More dummy data initialization...
         }
-    }
 
-    private void InitializeWithDummyData()
-    {
-        Tasks.Add(new TaskItem { TaskName = "Sample Task 1", Description = "Description", DueDate = DateTime.Now });
-        Tasks.Add(new TaskItem { TaskName = "Sample Task 2", Description = "Description", DueDate = DateTime.Now });
-        // More dummy data initialization...
-    }
-
-    public async Task SaveTasksAsync()
-    {
-        await _taskDataService.SaveTasksAsync(Tasks);
-    }
-
-    private async void DeleteTask(TaskItem task)
-    {
-        bool isUserSure = await Application.Current.MainPage.DisplayAlert(
-            "Confirm Delete",
-            "Are you sure you want to delete this task?",
-            "Yes", "No");
-
-        if (isUserSure && task != null)
+        public async Task SaveTasksAsync()
         {
-            // Perform UI-related actions on the main thread
-            Device.BeginInvokeOnMainThread(() =>
-            {
-                Tasks.Remove(task);
-            });
+            await _taskDataService.SaveTasksAsync(Tasks);
+        }
 
-            // Save the changes
-            await SaveTasksAsync(); // Awaiting the save operation
+        private async void DeleteTask(TaskItem task)
+        {
+            bool isUserSure = await Application.Current.MainPage.DisplayAlert(
+                "Confirm Delete",
+                "Are you sure you want to delete this task?",
+                "Yes", "No");
+
+            if (isUserSure && task != null)
+            {
+                // Perform UI-related actions on the main thread
+                Device.BeginInvokeOnMainThread(() =>
+                {
+                    Tasks.Remove(task);
+                });
+
+                // Save the changes
+                await SaveTasksAsync(); // Awaiting the save operation
+            }
         }
     }
 }
+
+
